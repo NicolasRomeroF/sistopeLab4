@@ -3,7 +3,9 @@
 #include <unistd.h>
 #include <stdint.h>
 
-typedef struct __attribute__((__packed__)) {                                                                                                                                                                                                                             
+#pragma pack(push, 1)
+
+typedef struct {                                                                                                                                                                                                                             
     unsigned char fileMarker1;                                                                                                                                                                                              
     unsigned char fileMarker2;                                                                                                                                                                                               
     unsigned int bfSize;                                                                                                                                                                                                                   
@@ -12,7 +14,11 @@ typedef struct __attribute__((__packed__)) {
     unsigned int imageDataOffset;                                                                                                                                                            
 } FILEHEADER;                                                                                                                                                                                                                                
 
-typedef struct __attribute__((__packed__)) {                                                                                                                                                                                                                             
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+
+typedef struct {                                                                                                                                                                                                                             
     unsigned int biSize;                                                                                                                                                                                                                   
     int width;                                                                                                                                                          
     int height;                                                                                                                                                                     
@@ -24,14 +30,19 @@ typedef struct __attribute__((__packed__)) {
     int biYPelsPerMeter;                                                                                                                                                                                                          
     unsigned int biClrUsed;                                                                                                                                                                                      
     unsigned int biClrImportant;                                                                                                                                                                                                           
-} INFOHEADER;                                                                                                                                                                                                                                
+} INFOHEADER;    
 
-typedef struct __attribute__((__packed__)) {                                                                                                                                                                                                                             
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+
+typedef struct {                                                                                                                                                                                                                             
     unsigned char b;                                                                                                                                                                                                                        
     unsigned char g;                                                                                                                                                                                                                        
     unsigned char r;                                                                                                                                                                                                                        
 } IMAGE;
 
+#pragma pack(pop)
 
 typedef struct matriz{
 	IMAGE ** matriz;
@@ -111,6 +122,16 @@ void reducirPorFilasImpares(Matriz * matriz, Matriz * matrizFinal, int nPixeles)
 		}
 	}
 }
+IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
+{
+	FILEHEADER fh;                                                                                                                                                                                                                           
+    INFOHEADER ih;                                                                                                                                                                                                                           
+    FILE *img = fopen("cuadro.bmp", "rb");
+    if(img==NULL)
+    {
+    	printf("ERROR: No se pudo abrir la imagen\n");
+    	return NULL;
+    }
 
 
 
@@ -123,15 +144,66 @@ int main() {
     fread(&ih, sizeof(unsigned char), sizeof(INFOHEADER), img);
     printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh.fileMarker1, fh.fileMarker2, fh.bfSize, fh.unused1, fh.unused2, fh.imageDataOffset);                                                                         
     printf("w = %d, h = %d, biSI = %d\n", ih.width, ih.height, ih.biSizeImage);
-    int i;
+    int i,j;
     
-    IMAGE im;
-    for(i=0;i<9;i++)
+    IMAGE** im=(IMAGE**)malloc(sizeof(IMAGE*)*ih.height);
+    if(im==NULL)
     {
-    	fread(&im, sizeof(unsigned char), sizeof(IMAGE), img);
-    	printf("r = %d, g = %d, b = %d\n", im.r, im.g, im.b);
+    	printf("ERROR: No se pudo asignar memoria a la imagen\n");
+    	return NULL;
     }
-   return 0;
+    for(i=0;i<ih.height;i++)
+    {
+    	im[i]=(IMAGE*)malloc(sizeof(IMAGE)*ih.width);
+    	if(im[i]==NULL)
+	    {
+	    	printf("ERROR: No se pudo asignar memoria a la imagen\n");
+	    	return NULL;
+	    }
+    }
+    fseek(img, fh.imageDataOffset, SEEK_SET);
+    IMAGE aux;
+    printf("asdsadn\n");
+    /*for(i=ih.height-1;i>-1;i--)
+    {
+    	for(j=0;j<ih.width;j++)
+    	{
+    		
+    		fread(&aux, sizeof(unsigned char), sizeof(IMAGE), img);
+    		//printf("r = %d, g = %d, b = %d\n", im[i][j].r, im[i][j].g, im[i][j].b);
+    	}
+    }*/
+
+    for(i=ih.height-1;i>-1;i--)
+    {
+    	for(j=0;j<ih.width;j++)
+    	{
+    		
+    		fread(&aux, sizeof(unsigned char), sizeof(IMAGE), img);
+    		//printf("ra = %d, ga = %d, ba = %d\n", aux.r, aux.g, aux.b);
+    		im[i][j]=aux;
+    		//printf("rm = %d, gm = %d, bm = %d\n", im[i][j].r, im[i][j].g, im[i][j].b);
+    	}
+    }
+
+    for(j=0;j<5;j++)
+    {
+		printf("r = %d, g = %d, b = %d\n", im[0][j].r, im[0][j].g, im[0][j].b);
+    }
+    *fho=fh;
+    *iho=ih;
+    return im;
+}
+
+
+
+int prueba() 
+{                                                                                                                                                                                                                             
+    FILEHEADER fh;
+    INFOHEADER ih;
+    IMAGE** img = obtenerImagen("cuadro.bmp",&fh,&ih);
+
+    return 0;
 }
 
 
