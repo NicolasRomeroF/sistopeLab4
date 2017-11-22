@@ -4,40 +4,51 @@
 #include <stdint.h>
 #include <time.h>
 
-typedef struct __attribute__((__packed__)) {                                                                                                                                                                                                                             
-    unsigned char fileMarker1;                                                                                                                                                                                              
-    unsigned char fileMarker2;                                                                                                                                                                                               
-    unsigned int bfSize;                                                                                                                                                                                                                   
-    uint16_t unused1;                                                                                                                                                                                                                        
-    uint16_t unused2;                                                                                                                                                                                                                        
-    unsigned int imageDataOffset;                                                                                                                                                            
-} FILEHEADER;                                                                                                                                                                                                                                
+#pragma pack(push, 1)
 
-typedef struct __attribute__((__packed__)) {                                                                                                                                                                                                                             
-    unsigned int biSize;                                                                                                                                                                                                                   
-    int width;                                                                                                                                                          
-    int height;                                                                                                                                                                     
-    uint16_t planes;                                                                                                                                                                                                                         
-    uint16_t bitPix;                                                                                                                                                                                                                         
-    unsigned int biCompression;                                                                                                                                                                                                            
-    unsigned int biSizeImage;                                                                                                                                                                                                              
-    int biXPelsPerMeter;                                                                                                                                                                                                          
-    int biYPelsPerMeter;                                                                                                                                                                                                          
-    unsigned int biClrUsed;                                                                                                                                                                                      
-    unsigned int biClrImportant;                                                                                                                                                                                                           
-} INFOHEADER;                                                                                                                                                                                                                                
+typedef struct {
+    unsigned char fileMarker1;
+    unsigned char fileMarker2;
+    unsigned int bfSize;
+    uint16_t unused1;
+    uint16_t unused2;
+    unsigned int imageDataOffset;
+} FILEHEADER;
 
-typedef struct __attribute__((__packed__)) {                                                                                                                                                                                                                             
-    unsigned char b;                                                                                                                                                                                                                        
-    unsigned char g;                                                                                                                                                                                                                        
-    unsigned char r;                                                                                                                                                                                                                        
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+
+typedef struct {
+    unsigned int biSize;
+    int width;
+    int height;
+    uint16_t planes;
+    uint16_t bitPix;
+    unsigned int biCompression;
+    unsigned int biSizeImage;
+    int biXPelsPerMeter;
+    int biYPelsPerMeter;
+    unsigned int biClrUsed;
+    unsigned int biClrImportant;
+} INFOHEADER;
+
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+
+typedef struct {
+    unsigned char b;
+    unsigned char g;
+    unsigned char r;
 } IMAGE;
 
+#pragma pack(pop)
 
-typedef struct matriz{
-	IMAGE ** matriz;
-	int x;
-	int y;
+typedef struct matriz {
+    IMAGE ** matriz;
+    int x;
+    int y;
 } Matriz;
 
 void insertarPixel(IMAGE * pixeles, int n, int x, int y, Matriz * matrizFinal){
@@ -144,62 +155,91 @@ void reducirPorFilasImpares(Matriz * matriz, Matriz * matrizFinal, int nPixeles)
 	free(pixeles);
 }
 
+IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
+{
+    FILEHEADER fh;
+    INFOHEADER ih;
+    FILE *img = fopen(nombre, "rb");
+    if (img == NULL)
+    {
+        printf("ERROR: No se pudo abrir la imagen\n");
+        return NULL;
+    }
 
-int main() {
-system("cls");                                                                                                                                                                                                                             
-    /*FILEHEADER fh;                                                                                                                                                                                                                           
-    INFOHEADER ih;                                                                                                                                                                                                                           
-    FILE *img = fopen("wea4.bmp", "rb");
+
     fread(&fh, sizeof(unsigned char), sizeof(FILEHEADER), img);
     fread(&ih, sizeof(unsigned char), sizeof(INFOHEADER), img);
-    printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh.fileMarker1, fh.fileMarker2, fh.bfSize, fh.unused1, fh.unused2, fh.imageDataOffset);                                                                         
+    printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh.fileMarker1, fh.fileMarker2, fh.bfSize, fh.unused1, fh.unused2, fh.imageDataOffset);
     printf("w = %d, h = %d, biSI = %d\n", ih.width, ih.height, ih.biSizeImage);
-    int i;
-    
-    IMAGE im;
-    for(i=0;i<9;i++)
-    {
-    	fread(&im, sizeof(unsigned char), sizeof(IMAGE), img);
-    	printf("r = %d, g = %d, b = %d\n", im.r, im.g, im.b);
-    }*/
-    srand(time(NULL));
-    int i,j;
-    Matriz * matriz = (Matriz*)malloc(sizeof(Matriz));
-    matriz->matriz = (IMAGE **)malloc(sizeof(IMAGE*)*8);
-    for(i=0;i<8;i++){
-    	matriz->matriz[i] = (IMAGE*)malloc(sizeof(IMAGE)*8);
-    }
-    for(i=0;i<8;i++){
-    	for(j=0;j<8;j++){
-    		matriz->matriz[i][j].r=rand()%256;
-    		matriz->matriz[i][j].g=rand()%256;
-    		matriz->matriz[i][j].b=rand()%256;
-    	}
-    }
-    matriz->x=8;
-    matriz->y=8;
+    int i, j;
 
-    Matriz * matrizFinal = (Matriz*)malloc(sizeof(Matriz));
-    matrizFinal->matriz = (IMAGE **)malloc(sizeof(IMAGE*)*8);
-    for(i=0;i<8;i++){
-    	matrizFinal->matriz[i] = (IMAGE*)malloc(sizeof(IMAGE)*3);
+    IMAGE** im = (IMAGE**)malloc(sizeof(IMAGE*)*ih.height);
+    if (im == NULL)
+    {
+        printf("ERROR: No se pudo asignar memoria a la imagen\n");
+        return NULL;
     }
-    for(i=0;i<8;i++){
-    	for(j=0;j<3;j++){
-    		matrizFinal->matriz[i][j].r=-1;
-    		matrizFinal->matriz[i][j].g=-1;
-    		matrizFinal->matriz[i][j].b=-1;
-    	}
+    for (i = 0; i < ih.height; i++)
+    {
+        im[i] = (IMAGE*)malloc(sizeof(IMAGE) * ih.width);
+        if (im[i] == NULL)
+        {
+            printf("ERROR: No se pudo asignar memoria a la imagen\n");
+            return NULL;
+        }
     }
-    matrizFinal->x=8;
-    matrizFinal->y=3;
-    printMatriz(matriz);
-    reducirPorFilasPares(matriz,matrizFinal,3);
-    reducirPorFilasImpares(matriz,matrizFinal,3);
-    printf("Print final\n");
-    printMatriz(matrizFinal);
-   return 0;
+    fseek(img, fh.imageDataOffset, SEEK_SET);
+    IMAGE aux;
+    printf("asdsadn\n");
+    /*for(i=ih.height-1;i>-1;i--)
+    {
+        for(j=0;j<ih.width;j++)
+        {
+
+            fread(&aux, sizeof(unsigned char), sizeof(IMAGE), img);
+            //printf("r = %d, g = %d, b = %d\n", im[i][j].r, im[i][j].g, im[i][j].b);
+        }
+    }*/
+
+    for (i = ih.height - 1; i > -1; i--)
+    {
+        for (j = 0; j < ih.width; j++)
+        {
+
+            fread(&aux, sizeof(unsigned char), sizeof(IMAGE), img);
+            //printf("ra = %d, ga = %d, ba = %d\n", aux.r, aux.g, aux.b);
+            im[i][j] = aux;
+            //printf("rm = %d, gm = %d, bm = %d\n", im[i][j].r, im[i][j].g, im[i][j].b);
+        }
+    }
+
+
+    *fho = fh;
+    *iho = ih;
+    return im;
 }
+
+Matriz* obtenerMatriz(char* nombre)
+{
+    FILEHEADER fh;
+    INFOHEADER ih;
+    IMAGE** img = obtenerImagen(nombre, &fh, &ih);
+    Matriz* m = obtenerMatriz(img, ih);
+    Matriz* m = (Matriz*)malloc(sizeof(Matriz));
+    m->matriz = img;
+    m->x = ih.height;
+    m->y = ih.width;
+    return m;
+}
+
+int main()
+{
+
+
+}
+
+
+
 
 
 
