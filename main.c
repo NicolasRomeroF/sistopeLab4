@@ -108,11 +108,11 @@ void reducirPorFilasImpares(Matriz * matriz, Matriz * matrizFinal, int nPixeles)
 	IMAGE * pixeles=(IMAGE*)malloc(sizeof(IMAGE)*nPixeles);
 	for(i=1;i<matriz->x;i=i+2){
 		for(j=matriz->y-1;j>=0;j--){
-			for(z=nPixeles-1;z=>0;z--){
+			for(z=nPixeles-1;z>=0;z--){
 				pixeles[z].r=matriz->matriz[i][j+(z-nPixeles+1)].r;
 				pixeles[z].g=matriz->matriz[i][j+(z-nPixeles+1)].g;
 				pixeles[z].b=matriz->matriz[i][j+(z-nPixeles+1)].b;
-				if(j-z=0){
+				if(j-z==0){
 					pixeles=completarArregloPixelesImpares(pixeles,nPixeles-z,nPixeles);
 					break;
 				}
@@ -122,24 +122,19 @@ void reducirPorFilasImpares(Matriz * matriz, Matriz * matrizFinal, int nPixeles)
 		}
 	}
 }
+
 IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
 {
 	FILEHEADER fh;                                                                                                                                                                                                                           
     INFOHEADER ih;                                                                                                                                                                                                                           
-    FILE *img = fopen("cuadro.bmp", "rb");
+    FILE *img = fopen(nombre, "rb");
     if(img==NULL)
     {
     	printf("ERROR: No se pudo abrir la imagen\n");
     	return NULL;
     }
+                                                                                                                                                                                                                        
 
-
-
-
-int main() {                                                                                                                                                                                                                             
-    FILEHEADER fh;                                                                                                                                                                                                                           
-    INFOHEADER ih;                                                                                                                                                                                                                           
-    FILE *img = fopen("wea4.bmp", "rb");
     fread(&fh, sizeof(unsigned char), sizeof(FILEHEADER), img);
     fread(&ih, sizeof(unsigned char), sizeof(INFOHEADER), img);
     printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh.fileMarker1, fh.fileMarker2, fh.bfSize, fh.unused1, fh.unused2, fh.imageDataOffset);                                                                         
@@ -195,16 +190,16 @@ int main() {
     return im;
 }
 
-
-
-int prueba() 
-{                                                                                                                                                                                                                             
-    FILEHEADER fh;
-    INFOHEADER ih;
+int main()
+{
+    FILEHEADER fh;                                                                                                                                                                                                                           
+    INFOHEADER ih; 
     IMAGE** img = obtenerImagen("cuadro.bmp",&fh,&ih);
 
-    return 0;
 }
+
+
+
 
 
 
