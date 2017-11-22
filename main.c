@@ -52,9 +52,9 @@ void insertarPixel(IMAGE * pixeles, int n, int x, int y, Matriz * matrizFinal){
 }
 
 
-IMAGE* completarArregloPixeles(IMAGE * pixeles, int ultimaPos, int n){
+IMAGE* completarArregloPixelesPares(IMAGE * pixeles, int y, int n){
 	int i;
-	for(i=ultimaPos;i<n;i++){
+	for(i=y;i<n;i++){
 		pixeles[i].r=0;
 		pixeles[i].g=0;
 		pixeles[i].b=0;
@@ -62,22 +62,52 @@ IMAGE* completarArregloPixeles(IMAGE * pixeles, int ultimaPos, int n){
 	return pixeles;
 }
 
-void reducirPorFilas(Matriz * matriz, Matriz * matrizFinal, int nPixeles){
+IMAGE* completarArregloPixelesImpares(IMAGE * pixeles,int nFaltante, int n){
+	int i;
+	for(i=nFaltante;i<n;i++){
+		pixeles[i].r=0;
+		pixeles[i].g=0;
+		pixeles[i].b=0;
+	}
+	return pixeles;
+}
+
+void reducirPorFilasPares(Matriz * matriz, Matriz * matrizFinal, int nPixeles){
 	int i,j,z;
 	IMAGE * pixeles=(IMAGE*)malloc(sizeof(IMAGE)*nPixeles);
-	for(i=0;i<matriz->x;i++){
+	for(i=0;i<matriz->x;i=i+2){
 		for(j=0;j<matriz->y;j++){
 			for(z=0;z<nPixeles;z++){
 				pixeles[z].r=matriz->matriz[i][j+z].r;
 				pixeles[z].g=matriz->matriz[i][j+z].g;
 				pixeles[z].b=matriz->matriz[i][j+z].b;
 				if(j+z>=matriz->y){
-					pixeles=completarArregloPixeles(pixeles,j+z,nPixeles);
+					pixeles=completarArregloPixelesPares(pixeles,j+z,nPixeles);
 					break;
 				}
 			}
 			insertarPixel(pixeles,nPixeles,matriz->x,matriz->y,matrizFinal);
 			j=j+nPixeles;
+		}
+	}
+}
+
+void reducirPorFilasImpares(Matriz * matriz, Matriz * matrizFinal, int nPixeles){
+	int i,j,z;
+	IMAGE * pixeles=(IMAGE*)malloc(sizeof(IMAGE)*nPixeles);
+	for(i=1;i<matriz->x;i=i+2){
+		for(j=matriz->y-1;j>=0;j--){
+			for(z=nPixeles-1;z=>0;z--){
+				pixeles[z].r=matriz->matriz[i][j+(z-nPixeles+1)].r;
+				pixeles[z].g=matriz->matriz[i][j+(z-nPixeles+1)].g;
+				pixeles[z].b=matriz->matriz[i][j+(z-nPixeles+1)].b;
+				if(j-z=0){
+					pixeles=completarArregloPixelesImpares(pixeles,nPixeles-z,nPixeles);
+					break;
+				}
+			}
+			insertarPixel(pixeles,nPixeles,matriz->x,matriz->y,matrizFinal);
+			j=j-nPixeles;
 		}
 	}
 }
