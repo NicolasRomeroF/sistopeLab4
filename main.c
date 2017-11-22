@@ -32,6 +32,8 @@ typedef struct __attribute__((__packed__)) {
     unsigned char r;                                                                                                                                                                                                                        
 } IMAGE;
 
+<<<<<<< HEAD
+=======
 typedef struct matriz{
 	IMAGE ** matriz;
 	int x;
@@ -45,43 +47,28 @@ unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader
     unsigned char *bitmapImage;  //store image data
     int imageIdx=0;  //image index counter
     unsigned char tempRGB;  //our swap variable
+>>>>>>> dbd495de91b25a99e9ede3ef16087296ddef815b
 
-    //open filename in read binary mode
-    filePtr = fopen(filename,"rb");
-    if (filePtr == NULL)
+
+int main() {                                                                                                                                                                                                                             
+    FILEHEADER fh;                                                                                                                                                                                                                           
+    INFOHEADER ih;                                                                                                                                                                                                                           
+    FILE *img = fopen("wea4.bmp", "rb");
+    fread(&fh, sizeof(unsigned char), sizeof(FILEHEADER), img);
+    fread(&ih, sizeof(unsigned char), sizeof(INFOHEADER), img);
+    printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh.fileMarker1, fh.fileMarker2, fh.bfSize, fh.unused1, fh.unused2, fh.imageDataOffset);                                                                         
+    printf("w = %d, h = %d, biSI = %d\n", ih.width, ih.height, ih.biSizeImage);
+    int i;
+    
+    IMAGE im;
+    for(i=0;i<9;i++)
     {
-    	printf("ERROR: No se pudo abrir la imagen dada\n");
-        return NULL;
+    	fread(&im, sizeof(unsigned char), sizeof(IMAGE), img);
+    	printf("r = %d, g = %d, b = %d\n", im.r, im.g, im.b);
     }
-
-    //read the bitmap file header
-    fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER),1,filePtr);
-
-    //verify that this is a bmp file by check bitmap id
-    if (bitmapFileHeader.bfType !=0x4D42)
-    {
-        fclose(filePtr);
-        printf("ERROR: La imagen no es de tipo bmp\n");
-        return NULL;
-    }
-
-    //read the bitmap info header
-    fread(bitmapInfoHeader, sizeof(BITMAPINFOHEADER),1,filePtr); // small edit. forgot to add the closing bracket at sizeof
-
-    //move file point to the begging of bitmap data
-    fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
-
-    //allocate enough memory for the bitmap image data
-    bitmapImage = (unsigned char*)malloc(bitmapInfoHeader->biSizeImage);
-
-    //verify memory allocation
-    if (!bitmapImage)
-    {
-        free(bitmapImage);
-        fclose(filePtr);
-        printf("ERROR: No se pudo asignar suficiente memoria a la imagen\n");
-        return NULL;
-    }
+<<<<<<< HEAD
+    return 0;
+=======
 
     //read in the bitmap image data
     fread(bitmapImage,bitmapInfoHeader->biSizeImage,filePtr);
@@ -185,4 +172,5 @@ int main()
 	}
 	return 0;
 //now do what you want with it, later on i will show you how to
+>>>>>>> dbd495de91b25a99e9ede3ef16087296ddef815b
 }
