@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 
 typedef struct __attribute__((__packed__)) {                                                                                                                                                                                                                             
     unsigned char fileMarker1;                                                                                                                                                                                              
@@ -30,6 +31,12 @@ typedef struct __attribute__((__packed__)) {
     unsigned char g;                                                                                                                                                                                                                        
     unsigned char r;                                                                                                                                                                                                                        
 } IMAGE;
+
+typedef struct matriz{
+	IMAGE ** matriz;
+	int x;
+	int y;
+} Matriz;
 
 unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader)
 {
@@ -99,6 +106,71 @@ unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader
     fclose(filePtr);
     return bitmapImage;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void insertarPixel(IMAGE * pixeles, int n, int x, int y, Matriz * matrizFinal){
+	int i,sumaR=0,sumaG=0,sumaB=0;
+	for(i = 0;i<n;i++){
+		sumaR=sumaR+pixeles[i].r;
+		sumaG=sumaG+pixeles[i].g;
+		sumaB=sumaB+pixeles[i].b;
+	}
+	matrizFinal->matriz[x][y].r=sumaR/n;
+	matrizFinal->matriz[x][y].g=sumaG/n;
+	matrizFinal->matriz[x][y].b=sumaB/n;
+}
+
+
+IMAGE* completarArregloPixeles(IMAGE * pixeles, int ultimaPos, int n){
+	int i;
+	for(i=ultimaPos;i<n;i++){
+		pixeles[i].r=0;
+		pixeles[i].g=0;
+		pixeles[i].b=0;
+	}
+	return pixeles;
+}
+
+void reducirPorFilas(Matriz * matriz, Matriz * matrizFinal, int nPixeles){
+	int i,j,z;
+	IMAGE * pixeles=(IMAGE*)malloc(sizeof(IMAGE)*nPixeles);
+	for(i=0;i<matriz->x;i++){
+		for(j=0;j<matriz->y;j++){
+			for(z=0;z<nPixeles;z++){
+				pixeles[z].r=matriz->matriz[i][j+z].r;
+				pixeles[z].g=matriz->matriz[i][j+z].g;
+				pixeles[z].b=matriz->matriz[i][j+z].b;
+				if(j+z>=matriz->y){
+					pixeles=completarArregloPixeles(pixeles,j+z,nPixeles);
+					break;
+				}
+			}
+			insertarPixel(pixeles,nPixeles,matriz->x,matriz->y,matrizFinal);
+			j=j+nPixeles;
+		}
+	}
+}
+
 
 int main()
 {
