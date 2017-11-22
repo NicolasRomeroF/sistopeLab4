@@ -187,8 +187,12 @@ IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
     return im;
 }
 
-Matriz* obtenerMatriz(IMAGE** img, INFOHEADER ih)
+Matriz* obtenerMatriz(char* nombre)
 {
+    FILEHEADER fh;
+    INFOHEADER ih;
+    IMAGE** img = obtenerImagen(nombre, &fh, &ih);
+    Matriz* m = obtenerMatriz(img, ih);
     Matriz* m = (Matriz*)malloc(sizeof(Matriz));
     m->matriz = img;
     m->x = ih.height;
@@ -198,10 +202,7 @@ Matriz* obtenerMatriz(IMAGE** img, INFOHEADER ih)
 
 int main()
 {
-    FILEHEADER fh;
-    INFOHEADER ih;
-    IMAGE** img = obtenerImagen("cuadro.bmp", &fh, &ih);
-    Matriz* m = obtenerMatriz(img, ih);
+
 
 }
 
