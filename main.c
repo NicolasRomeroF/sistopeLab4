@@ -6,57 +6,14 @@
 #include <math.h>
 #include <unistd.h>
 #include <ctype.h>
+#include "funciones.h"
 
 #pragma pack(push, 1)
 
-typedef struct {
-	unsigned char fileMarker1;
-	unsigned char fileMarker2;
-	unsigned int bfSize;
-	uint16_t unused1;
-	uint16_t unused2;
-	unsigned int imageDataOffset;
-} FILEHEADER;
-
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-
-typedef struct {
-	unsigned int biSize;
-	int width;
-	int height;
-	uint16_t planes;
-	uint16_t bitPix;
-	unsigned int biCompression;
-	unsigned int biSizeImage;
-	int biXPelsPerMeter;
-	int biYPelsPerMeter;
-	unsigned int biClrUsed;
-	unsigned int biClrImportant;
-} INFOHEADER;
-
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-
-typedef struct {
-	unsigned char b;
-	unsigned char g;
-	unsigned char r;
-} IMAGE;
-
-#pragma pack(pop)
-
-typedef struct matriz {
-	IMAGE ** matriz;
-	int x;
-	int y;
-} Matriz;
 
 void insertarPixelFila(IMAGE * pixeles, int n, int x, int y, Matriz * matrizFinal) {
 	int i, sumaR = 0, sumaG = 0, sumaB = 0;
-	printf("Insertando pixel, n=%d\n", n);
+	//printf("Insertando pixel, n=%d\n", n);
 	for (i = 0; i < n; i++) {
 		sumaR = sumaR + pixeles[i].r;
 		sumaG = sumaG + pixeles[i].g;
@@ -65,13 +22,13 @@ void insertarPixelFila(IMAGE * pixeles, int n, int x, int y, Matriz * matrizFina
 	matrizFinal->matriz[x][y].r = sumaR / n;
 	matrizFinal->matriz[x][y].g = sumaG / n;
 	matrizFinal->matriz[x][y].b = sumaB / n;
-	printf("		x=%d, y = %d\n", x, y);
-	printf("		Promedios: R = %d , G = %d, B = %d \n", matrizFinal->matriz[x][y].r, matrizFinal->matriz[x][y].g, matrizFinal->matriz[x][y].b);
+	//printf("		x=%d, y = %d\n", x, y);
+	//printf("		Promedios: R = %d , G = %d, B = %d \n", matrizFinal->matriz[x][y].r, matrizFinal->matriz[x][y].g, matrizFinal->matriz[x][y].b);
 }
 
 void insertarPixelFilaImparLimite(IMAGE * pixeles, int n, int x, int y, Matriz * matrizFinal, int start, int nPixeles) {
 	int i, sumaR = 0, sumaG = 0, sumaB = 0;
-	printf("Insertando pixel, n=%d, start = %d\n", n, start);
+	//printf("Insertando pixel, n=%d, start = %d\n", n, start);
 	for (i = start; i < nPixeles; i++) {
 		sumaR = sumaR + pixeles[i].r;
 		sumaG = sumaG + pixeles[i].g;
@@ -80,23 +37,23 @@ void insertarPixelFilaImparLimite(IMAGE * pixeles, int n, int x, int y, Matriz *
 	matrizFinal->matriz[x][y].r = sumaR / n;
 	matrizFinal->matriz[x][y].g = sumaG / n;
 	matrizFinal->matriz[x][y].b = sumaB / n;
-	printf("		x=%d, y = %d\n", x, y);
-	printf("		Promedios: R = %d , G = %d, B = %d \n", matrizFinal->matriz[x][y].r, matrizFinal->matriz[x][y].g, matrizFinal->matriz[x][y].b);
+	//printf("		x=%d, y = %d\n", x, y);
+	//printf("		Promedios: R = %d , G = %d, B = %d \n", matrizFinal->matriz[x][y].r, matrizFinal->matriz[x][y].g, matrizFinal->matriz[x][y].b);
 }
 
 void printMatriz(Matriz * matriz) {
 	int i, j;
 	for (i = 0; i < matriz->x; i++) {
 		for (j = 0; j < matriz->y; j++) {
-			printf("[R=%d G=%d B=%d] ", matriz->matriz[i][j].r, matriz->matriz[i][j].g, matriz->matriz[i][j].b);
+			//printf("[R=%d G=%d B=%d] ", matriz->matriz[i][j].r, matriz->matriz[i][j].g, matriz->matriz[i][j].b);
 		}
-		printf("\n");
+		//printf("\n");
 	}
 }
 void printArregloPixeles(IMAGE * pixeles, int nPixeles) {
 	int i;
 	for (i = 0; i < nPixeles; i++) {
-		printf("%d.- R = %d G = %d B = %d\n", i, pixeles[i].r, pixeles[i].g, pixeles[i].b);
+		//printf("%d.- R = %d G = %d B = %d\n", i, pixeles[i].r, pixeles[i].g, pixeles[i].b);
 	}
 }
 
@@ -107,18 +64,18 @@ void reducirPorFilasPares(Matriz * matriz, Matriz * matrizFinal, int nPixeles) {
 	for (i = 0; i < matriz->x; i = i + 2) {
 		for (j = 0; j < matriz->y; j++) {
 			isBorde = 0;
-			printf("i=%d, j=%d\n", i, j);
+			//printf("i=%d, j=%d\n", i, j);
 			for (z = 0; z < nPixeles; z++) {
-				printf("	z=%d\n", z);
+				//printf("	z=%d\n", z);
 				pixeles[z].r = matriz->matriz[i][j + z].r;
 				pixeles[z].g = matriz->matriz[i][j + z].g;
 				pixeles[z].b = matriz->matriz[i][j + z].b;
-				printf("	pixel r=%d\n        pixel g = %d\n        pixel b = %d\n", pixeles[z].r, pixeles[z].g, pixeles[z].b);
+				//printf("	pixel r=%d\n        pixel g = %d\n        pixel b = %d\n", pixeles[z].r, pixeles[z].g, pixeles[z].b);
 				if (j + z >= matriz->y - 1 && nPixeles - z != 1) {
-					printf("Fuera de rango!, condicion de if = %d\n", j + z);
+					//printf("Fuera de rango!, condicion de if = %d\n", j + z);
 					isBorde = 1;
 					insertarPixelFila(pixeles, z + 1, i, j / nPixeles, matrizFinal);
-					//printArregloPixeles(pixeles,nPixeles);
+					////printArregloPixeles(pixeles,nPixeles);
 					break;
 				}
 			}
@@ -126,7 +83,7 @@ void reducirPorFilasPares(Matriz * matriz, Matriz * matrizFinal, int nPixeles) {
 				insertarPixelFila(pixeles, nPixeles , i, j / nPixeles, matrizFinal);
 			}
 			j = j + nPixeles - 1;
-			//printMatriz(matrizFinal);
+			////printMatriz(matrizFinal);
 		}
 	}
 	free(pixeles);
@@ -139,17 +96,17 @@ void reducirPorFilasImpares(Matriz * matriz, Matriz * matrizFinal, int nPixeles)
 	for (i = 1; i < matriz->x; i = i + 2) {
 		for (j = matriz->y - 1; j >= 0; j--) {
 			isBorde = 0;
-			printf("i=%d,j=%d\n", i, j);
+			//printf("i=%d,j=%d\n", i, j);
 			for (z = nPixeles - 1; z >= 0; z--) {
-				printf("	z=%d\n", z);
+				//printf("	z=%d\n", z);
 				pixeles[z].r = matriz->matriz[i][j + (z - nPixeles + 1)].r;
 				pixeles[z].g = matriz->matriz[i][j + (z - nPixeles + 1)].g;
 				pixeles[z].b = matriz->matriz[i][j + (z - nPixeles + 1)].b;
-				printf("	pixel r=%d\n        pixel g = %d\n        pixel r = %d\n", pixeles[z].r, pixeles[z].g, pixeles[z].b);
+				//printf("	pixel r=%d\n        pixel g = %d\n        pixel r = %d\n", pixeles[z].r, pixeles[z].g, pixeles[z].b);
 				if ((j + (z - nPixeles + 1)) <= 0 && z != 0) {
-					printf("	Fuera de rango!, condicion de if = %d\n", (j + (z - nPixeles + 1)));
+					//printf("	Fuera de rango!, condicion de if = %d\n", (j + (z - nPixeles + 1)));
 					isBorde = 1;
-					printf("VAlor de z antes de insertar en limite ********************************* %d\n", z);
+					//printf("VAlor de z antes de insertar en limite ********************************* %d\n", z);
 					insertarPixelFilaImparLimite(pixeles, nPixeles - z, i, j / nPixeles, matrizFinal, z, nPixeles);
 					break;
 				}
@@ -158,7 +115,7 @@ void reducirPorFilasImpares(Matriz * matriz, Matriz * matrizFinal, int nPixeles)
 				insertarPixelFila(pixeles, nPixeles, i, j / nPixeles, matrizFinal);
 			}
 			j = j - nPixeles + 1;
-			//printMatriz(matrizFinal);
+			////printMatriz(matrizFinal);
 		}
 	}
 	free(pixeles);
@@ -174,8 +131,8 @@ void insertarPixelColumna(IMAGE * pixeles, int n, int x, int y, Matriz * matrizF
 	matrizFinal->matriz[x][y].r = sumaR / n;
 	matrizFinal->matriz[x][y].g = sumaG / n;
 	matrizFinal->matriz[x][y].b = sumaB / n;
-	printf("		x=%d, y = %d\n", x, y);
-	printf("		Promedios: R = %d , G = %d, B = %d \n", matrizFinal->matriz[x][y].r, matrizFinal->matriz[x][y].g, matrizFinal->matriz[x][y].b);
+	//printf("		x=%d, y = %d\n", x, y);
+	//printf("		Promedios: R = %d , G = %d, B = %d \n", matrizFinal->matriz[x][y].r, matrizFinal->matriz[x][y].g, matrizFinal->matriz[x][y].b);
 }
 
 void reducirPorColumnas(Matriz * matriz, Matriz * matrizFinal, int nPixeles) {
@@ -185,14 +142,14 @@ void reducirPorColumnas(Matriz * matriz, Matriz * matrizFinal, int nPixeles) {
 	for (j = 0; j < matriz->y; j++) {
 		for (i = 0; i < matriz->x; i++) {
 			isBorde = 0;
-			printf("i=%d,j=%d\n", i, j);
+			//printf("i=%d,j=%d\n", i, j);
 			for (z = 0; z < nPixeles; z++) {
 				pixeles[z].r = matriz->matriz[i + z][j].r;
 				pixeles[z].g = matriz->matriz[i + z][j].g;
 				pixeles[z].b = matriz->matriz[i + z][j].b;
-				printf("	pixel r=%d\n        pixel g = %d\n        pixel r = %d\n", pixeles[z].r, pixeles[z].g, pixeles[z].b, i + z);
+				//printf("	pixel r=%d\n        pixel g = %d\n        pixel r = %d\n", pixeles[z].r, pixeles[z].g, pixeles[z].b, i + z);
 				if ((i + z) >= matriz->x - 1) {
-					printf("	Fuera de rango!\n");
+					//printf("	Fuera de rango!\n");
 					isBorde = 1;
 					insertarPixelColumna(pixeles, z + 1, i / nPixeles, j, matrizFinal);
 					break;
@@ -202,7 +159,7 @@ void reducirPorColumnas(Matriz * matriz, Matriz * matrizFinal, int nPixeles) {
 				insertarPixelColumna(pixeles, nPixeles, i / nPixeles, j, matrizFinal);
 			}
 			i = i + nPixeles - 1;
-			//printMatriz(matrizFinal);
+			////printMatriz(matrizFinal);
 		}
 	}
 }
@@ -214,21 +171,21 @@ IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
 	FILE *img = fopen(nombre, "rb");
 	if (img == NULL)
 	{
-		printf("ERROR: No se pudo abrir la imagen\n");
+		//printf("ERROR: No se pudo abrir la imagen\n");
 		return NULL;
 	}
 
 
 	fread(&fh, sizeof(unsigned char), sizeof(FILEHEADER), img);
 	fread(&ih, sizeof(unsigned char), sizeof(INFOHEADER), img);
-	printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh.fileMarker1, fh.fileMarker2, fh.bfSize, fh.unused1, fh.unused2, fh.imageDataOffset);
-	printf("w = %d, h = %d, biSI = %d\n", ih.width, ih.height, ih.biSizeImage);
+	//printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh.fileMarker1, fh.fileMarker2, fh.bfSize, fh.unused1, fh.unused2, fh.imageDataOffset);
+	//printf("w = %d, h = %d, biSI = %d\n", ih.width, ih.height, ih.biSizeImage);
 	int i, j;
 
 	IMAGE** im = (IMAGE**)malloc(sizeof(IMAGE*)*ih.height);
 	if (im == NULL)
 	{
-		printf("ERROR: No se pudo asignar memoria a la imagen\n");
+		//printf("ERROR: No se pudo asignar memoria a la imagen\n");
 		return NULL;
 	}
 	for (i = 0; i < ih.height; i++)
@@ -236,13 +193,13 @@ IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
 		im[i] = (IMAGE*)malloc(sizeof(IMAGE) * ih.width);
 		if (im[i] == NULL)
 		{
-			printf("ERROR: No se pudo asignar memoria a la imagen\n");
+			//printf("ERROR: No se pudo asignar memoria a la imagen\n");
 			return NULL;
 		}
 	}
 	fseek(img, fh.imageDataOffset, SEEK_SET);
 	IMAGE aux;
-	printf("asdsadn\n");
+	//printf("asdsadn\n");
 
 
 	for (i = ih.height - 1; i > -1; i--)
@@ -281,17 +238,17 @@ Matriz* obtenerMatriz(char* nombre)
 }
 
 void reducirPorFilas(Matriz * matriz, Matriz * matrizFinal, int nPixeles) {
-	printf("APLICANDO REDUCCION nPixeles = %d\n", nPixeles);
+	//printf("APLICANDO REDUCCION nPixeles = %d\n", nPixeles);
 	reducirPorFilasPares(matriz, matrizFinal, nPixeles);
 	reducirPorFilasImpares(matriz, matrizFinal, nPixeles);
-	//printMatriz(matrizFinal);
-	printf("TERMINA REDUCCION\n");
+	////printMatriz(matrizFinal);
+	//printf("TERMINA REDUCCION\n");
 }
 
 void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * salida1, FILE * salida2, int pantalla) {
-	printf("n iteraciones: %d\n", nReducciones);
+	//printf("n iteraciones: %d\n", nReducciones);
 	int i, j;
-	int xM = 30, yM = 30;
+	/*int xM = 30, yM = 30;
 	Matriz * matriz = (Matriz*)malloc(sizeof(Matriz));
 	matriz->matriz = (IMAGE**)malloc(sizeof(IMAGE*)*xM);
 	for (i = 0; i < xM; i++) {
@@ -305,20 +262,20 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 		}
 	}
 	matriz->x = xM;
-	matriz->y = yM;
-	//Matriz * matriz = obtenerMatriz(entrada);
-	printMatriz(matriz);
+	matriz->y = yM;*/
+	Matriz * matriz = obtenerMatriz(entrada);
+	Matriz * matrizFinal;
+	//printMatriz(matriz);
 	if (metodo == 1) {
 		int z = 0;
-		Matriz * matrizFinal;
 		while (z < nReducciones) {
 			int i;
-			printf("*******************MATRIZ A REDUCIR**********************************\n");
-			printMatriz(matriz);
-			printf("nReducciones actual= %d----------------------------------------------------------------------\n", z);
+			//printf("*******************MATRIZ A REDUCIR**********************************\n");
+			//printMatriz(matriz);
+			//printf("nReducciones actual= %d----------------------------------------------------------------------\n", z);
 			double div = ceil((double)matriz->y / nPixeles);
 			int xMF = matriz->x, yMF = (int)div;
-			printf("nPixeles = %d, Dimensiones matriz final xMF= %d yMF = %d \n", nPixeles, xMF, yMF);
+			//printf("nPixeles = %d, Dimensiones matriz final xMF= %d yMF = %d \n", nPixeles, xMF, yMF);
 			matrizFinal = (Matriz*)malloc(sizeof(Matriz));
 			matrizFinal->matriz = (IMAGE**)malloc(sizeof(IMAGE*)*xMF);
 			for (i = 0; i < xMF; i++) {
@@ -337,18 +294,19 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 			matriz = matrizFinal;
 			z++;
 		}
-		printMatriz(matrizFinal);
+		guardarFichero(salida1,matrizFinal);
+		////printMatriz(matrizFinal);
 	}
 	else if (metodo == 2) {
 		int z = 0;
 		while (z < nReducciones) {
 			int i;
-			printf("*******************MATRIZ A REDUCIR**********************************\n");
-			printMatriz(matriz);
-			printf("nReducciones actual= %d----------------------------------------------------------------------\n", z);
+			//printf("*******************MATRIZ A REDUCIR**********************************\n");
+			//printMatriz(matriz);
+			//printf("nReducciones actual= %d----------------------------------------------------------------------\n", z);
 			double div = ceil((double)matriz->x / nPixeles);
 			int yMF = matriz->y, xMF = (int)div;
-			printf("nPixeles = %d, Dimensiones matriz final xMF= %d yMF = %d \n", nPixeles, xMF, yMF);
+			//printf("nPixeles = %d, Dimensiones matriz final xMF= %d yMF = %d \n", nPixeles, xMF, yMF);
 			Matriz * matrizFinal = (Matriz*)malloc(sizeof(Matriz));
 			matrizFinal->matriz = (IMAGE**)malloc(sizeof(IMAGE*)*xMF);
 			for (i = 0; i < xMF; i++) {
@@ -367,32 +325,33 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 			matriz = matrizFinal;
 			z++;
 		}
+		guardarFichero(salida2,matrizFinal);
 	}
 }
 
 int verificarEntradas(Matriz * fileEntrada, FILE * fileSalida1, FILE * fileSalida2, int nReducciones, int nPixeles, int metodo, int flag) {
 	if (fileEntrada == NULL) {
-		printf("No se pudo abrir archivo de entrada\n");
+		//printf("No se pudo abrir archivo de entrada\n");
 		return 0;
 	}
 	else if (fileSalida1 == NULL) {
-		printf("No se pudo crear archivo de salida 1\n");
+		//printf("No se pudo crear archivo de salida 1\n");
 		return 0;
 	}
 	else if (fileSalida2 == NULL) {
-		printf("No se pudo crear archivo de salida 2\n");
+		//printf("No se pudo crear archivo de salida 2\n");
 		return 0;
 	}
 	else if (nReducciones <= 0) {
-		printf("La cantidad de reducciones debe ser mayor o igual a 1\n");
+		//printf("La cantidad de reducciones debe ser mayor o igual a 1\n");
 		return 0;
 	}
 	else if (nPixeles <= 1) {
-		printf("La cantidad de pixeles debe ser mayor o igual a 2\n");
+		//printf("La cantidad de pixeles debe ser mayor o igual a 2\n");
 		return 0;
 	}
 	else if (metodo <= 0 || metodo >= 4) {
-		printf("El método debe ser 1, 2 o 3\n");
+		//printf("El método debe ser 1, 2 o 3\n");
 		return 0;
 	}
 	return 1;
@@ -467,12 +426,12 @@ int init(int argc, char **argv) {
 		}
 
 	}
-	printf("i = %s s = %s g = %s n = %d m = %d o = %d d = %d", archivoEntrada, archivoSalida1, archivoSalida2, nReducciones, nPixeles, metodo, flag);
+	//printf("i = %s s = %s g = %s n = %d m = %d o = %d d = %d", archivoEntrada, archivoSalida1, archivoSalida2, nReducciones, nPixeles, metodo, flag);
 
 
 	//Se muestra mensaje en caso de ingresar un argumento que no existe
 	for (index = optind; index < argc; index++) {
-		printf ("Argumento no existente %s\n", argv[index]);
+		//printf ("Argumento no existente %s\n", argv[index]);
 		return -1;
 	}
 
@@ -544,31 +503,3 @@ int main(int argc, char **argv)
 {
 	init(argc, argv);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
