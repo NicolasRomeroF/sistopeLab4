@@ -306,6 +306,8 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 			}
 			matrizFinal->x = xMF;
 			matrizFinal->y = yMF;
+						printf("Dimensiones matriz x = %d, y = %d \n     Dimensiones matriz final x = %d  y = %d\n",matriz->x,matriz->y,matrizFinal->x,matrizFinal->y);
+
 			reducirPorFilas(matriz, matrizFinal, nPixeles);
 			matriz = matrizFinal;
 			z++;
@@ -462,7 +464,7 @@ int init(int argc, char **argv) {
 		return 0;
 	}
 	printf("reducirrr\n");
-	reducir(nPixeles, metodo, nReducciones, archivoEntrada, fileSalida1, fileSalida2, flag);
+	reducir(nReducciones, metodo, nPixeles, archivoEntrada, fileSalida1, fileSalida2, flag);
 }
 
 FILEHEADER* iniciarFileHeader()
