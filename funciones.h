@@ -75,7 +75,7 @@ void reducirPorColumnas(Matriz * matriz, Matriz * matrizFinal, int nPixeles);
 
 IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho);
 
-Matriz* obtenerMatriz(char* nombre);
+IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho);
 
 
 void reducirPorFilas(Matriz * matriz, Matriz * matrizFinal, int nPixeles);
@@ -92,7 +92,7 @@ INFOHEADER* iniciarInfoHeader();
 
 void writeMatriz(Matriz* m, FILE* f);
 
-int guardarFichero(FILE* f, Matriz* m);
+int guardarFichero(FILE* f, Matriz* m,FILEHEADER fh,INFOHEADER ih);
 
 int main(int argc, char **argv);
 

@@ -9,7 +9,6 @@
 #include <string.h>
 #include "funciones.h"
 
-#pragma pack(push, 1)
 
 
 void insertarPixelFila(IMAGE * pixeles, int n, int x, int y, Matriz * matrizFinal) {
@@ -181,7 +180,7 @@ IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
 	fread(&ih, sizeof(unsigned char), sizeof(INFOHEADER), img);
 	//fwrite(&fh, sizeof(unsigned char), sizeof(FILEHEADER), s);
 	//fwrite(&ih, sizeof(unsigned char), sizeof(INFOHEADER), s);
-	printf("%d+%d",sizeof(FILEHEADER),sizeof(INFOHEADER));
+	printf("%d+%d", sizeof(FILEHEADER), sizeof(INFOHEADER));
 
 	printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh.fileMarker1, fh.fileMarker2, fh.bfSize, fh.unused1, fh.unused2, fh.imageDataOffset);
 	printf("w = %d, h = %d, biSI = %d\n", ih.width, ih.height, ih.biSizeImage);
@@ -202,13 +201,13 @@ IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
 			return NULL;
 		}
 	}
-	unsigned int pixelBytesPerRow = ih.width*3;
-	unsigned int paddingBytesPerRow = (4-(pixelBytesPerRow%4))%4;
+	unsigned int pixelBytesPerRow = ih.width * 3;
+	unsigned int paddingBytesPerRow = (4 - (pixelBytesPerRow % 4)) % 4;
 	fseek(img, fh.imageDataOffset, SEEK_SET);
 	IMAGE aux;
 	//printf("asdsadn\n");
 
-	int cont =0;
+	int cont = 0;
 	//static unsigned char zeroes[3] = {0,0,0};
 
 	for (i = ih.height - 1; i > -1; i--)
@@ -225,7 +224,7 @@ IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
 		}
 		//fwrite(,sizeof(unsigned char),paddingBytesPerRow,s);
 	}
-printf("redi %d\n",cont);
+	printf("redi %d\n", cont);
 
 	*fho = fh;
 	*iho = ih;
@@ -234,11 +233,10 @@ printf("redi %d\n",cont);
 	return im;
 }
 
-Matriz* obtenerMatriz(char* nombre)
+Matriz* obtenerMatriz(char* nombre, FILEHEADER* fh, INFOHEADER* ih)
 {
-	FILEHEADER fh;
-	INFOHEADER ih;
-	IMAGE** img = obtenerImagen(nombre, &fh, &ih);
+
+	IMAGE** img = obtenerImagen(nombre, fh, ih);
 	if (img == NULL) {
 		return NULL;
 	}
@@ -247,8 +245,8 @@ Matriz* obtenerMatriz(char* nombre)
 		return NULL;
 	}
 	m->matriz = img;
-	m->x = ih.height;
-	m->y = ih.width;
+	m->x = ih->height;
+	m->y = ih->width;
 	return m;
 }
 
@@ -278,7 +276,9 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 	}
 	matriz->x = xM;
 	matriz->y = yM;*/
-	Matriz * matriz = obtenerMatriz(entrada);
+	FILEHEADER fh;
+	INFOHEADER ih;
+	Matriz * matriz = obtenerMatriz(entrada, &fh, &ih);
 	//guardarFichero(salida2, matriz);
 	Matriz * matrizFinal;
 	//printMatriz(matriz);
@@ -311,7 +311,7 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 			z++;
 		}
 		printf("fichero1\n");
-		guardarFichero(salida1, matrizFinal);
+		guardarFichero(salida1, matrizFinal, fh, ih);
 		////printMatriz(matrizFinal);
 	}
 	else if (metodo == 2) {
@@ -343,7 +343,7 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 			z++;
 		}
 		printf("guaradndooo\n");
-		guardarFichero(salida2,matrizFinal);
+		guardarFichero(salida2, matrizFinal,fh,ih);
 	}
 }
 
@@ -364,8 +364,8 @@ int verificarEntradas(Matriz * fileEntrada, FILE * fileSalida1, FILE * fileSalid
 		printf("La cantidad de reducciones debe ser mayor o igual a 1\n");
 		return 0;
 	}
-	else if (nPixeles <= 1) {
-		printf("La cantidad de pixeles debe ser mayor o igual a 2\n");
+	else if (nPixeles <= 0) {
+		printf("La cantidad de pixeles debe ser mayor o igual a 1\n");
 		return 0;
 	}
 	else if (metodo <= 0 || metodo >= 4) {
@@ -457,7 +457,7 @@ int init(int argc, char **argv) {
 	FILE* fileSalida2 = fopen(archivoSalida2, "wb");
 
 
-	if (verificarEntradas(obtenerMatriz(archivoEntrada), fileSalida1, fileSalida2, nReducciones, nPixeles, metodo, flag) == 0) {
+	if (verificarEntradas(obtenerMatriz(archivoEntrada, NULL, NULL), fileSalida1, fileSalida2, nReducciones, nPixeles, metodo, flag) == 0) {
 		printf("salir\n");
 		return 0;
 	}
@@ -467,7 +467,7 @@ int init(int argc, char **argv) {
 
 FILEHEADER* iniciarFileHeader()
 {
-	FILEHEADER* fh =(FILEHEADER*)malloc(sizeof(FILEHEADER));
+	FILEHEADER* fh = (FILEHEADER*)malloc(sizeof(FILEHEADER));
 	fh->fileMarker1 = 'B';
 	fh->fileMarker2 = 'M';
 	fh->bfSize = 0;
@@ -479,7 +479,7 @@ FILEHEADER* iniciarFileHeader()
 
 INFOHEADER* iniciarInfoHeader()
 {
-	INFOHEADER* ih=(INFOHEADER*)malloc(sizeof(INFOHEADER));
+	INFOHEADER* ih = (INFOHEADER*)malloc(sizeof(INFOHEADER));
 	ih->biSize = 40;
 	ih->width = 0;
 	ih->height = 0;
@@ -498,9 +498,9 @@ void writeMatriz(Matriz* m, FILE* f)
 {
 	IMAGE aux;
 	int i, j;
-	unsigned int pixelBytesPerRow = m->y*3;
-	unsigned int paddingBytesPerRow = (4-(pixelBytesPerRow%4))%4;
-	static unsigned char zeroes[3] = {0,0,0};
+	unsigned int pixelBytesPerRow = m->y * 3;
+	unsigned int paddingBytesPerRow = (4 - (pixelBytesPerRow % 4)) % 4;
+	static unsigned char zeroes[3] = {0, 0, 0};
 
 	for (i = m->x - 1; i > -1; i--)
 	{
@@ -509,28 +509,25 @@ void writeMatriz(Matriz* m, FILE* f)
 			aux = m->matriz[i][j];
 			fwrite(&aux, sizeof(unsigned char), sizeof(IMAGE), f);
 		}
-		fwrite(zeroes,sizeof(unsigned char),paddingBytesPerRow,f);
+		fwrite(zeroes, sizeof(unsigned char), paddingBytesPerRow, f);
 	}
 }
 
-int guardarFichero(FILE* f, Matriz* m)
+int guardarFichero(FILE* f, Matriz* m, FILEHEADER fh, INFOHEADER ih)
 {
-	printf("entreGuardar\n");
-	FILEHEADER* fh = iniciarFileHeader();
-	printf("pasefileh\n");
-	INFOHEADER* ih = iniciarInfoHeader();
 	printf("paseih\n");
-	printf("%dx%d\n",m->y,m->x);
-	ih->width = m->y;
-
-	ih->height = m->x;
-	printf("%dx%d\n",m->y,m->x);
+	printf("%dx%d\n", m->y, m->x);
+	ih.width = m->y;
+	static unsigned char header[54] = {66, 77, 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 24};
+	ih.height = m->x;
+	printf("%dx%d\n", m->y, m->x);
 	int imageSize = m->y * m->x;
 	int file_size = 54 + 4 * imageSize;
-	fh->bfSize = file_size;
-	ih->biSizeImage = imageSize;
-	fwrite(&fh, sizeof(unsigned char), sizeof(FILEHEADER), f);
-	fwrite(&ih, sizeof(unsigned char), sizeof(INFOHEADER), f);
+	fh.bfSize = file_size;
+	ih.biSizeImage = imageSize;
+	//fwrite(&fh, sizeof(unsigned char), sizeof(FILEHEADER), f);
+	//fwrite(&ih, sizeof(unsigned char), sizeof(INFOHEADER), f);
+	fwrite(header, sizeof(unsigned char), 54, f);
 	printf("escribir matriz\n");
 	writeMatriz(m, f);
 }
