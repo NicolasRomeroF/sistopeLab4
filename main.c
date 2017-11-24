@@ -464,7 +464,7 @@ INFOHEADER iniciarInfoHeader()
 	ih.biSize = 40;
 	int width = 0;
 	int height = 0;
-	uint16_t planes = 0;
+	uint16_t planes = 1;
 	uint16_t bitPix = 24;
 	unsigned int biCompression = 0;
 	unsigned int biSizeImage = 0;
@@ -494,6 +494,10 @@ int guardarFichero(FILE* f, Matriz* m)
 	INFOHEADER ih = iniciarInfoHeader();
 	ih.width = m->y;
 	ih.height = m->x;
+	int imageSize = m->y*m->x;
+	int file_size = 54 + 4 * imageSize;
+	fh.bfSize=file_size;
+	ih.biSizeImage=imageSize;
 	fwrite(&fh, sizeof(unsigned char), sizeof(FILEHEADER), f);
 	fwrite(&ih, sizeof(unsigned char), sizeof(INFOHEADER), f);
 	writeMatriz(m,f);
