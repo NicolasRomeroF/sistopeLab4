@@ -57,6 +57,13 @@ typedef struct matriz {
 	int y;
 } Matriz;
 
+typedef struct {
+	INFOHEADER ih;
+	FILEHEADER fh;
+	IMAGE** img;
+	Matriz* m;
+} IMGINFO;
+
 void insertarPixelFila(IMAGE * pixeles, int n, int x, int y, Matriz * matrizFinal);
 
 void insertarPixelFilaImparLimite(IMAGE * pixeles, int n, int x, int y, Matriz * matrizFinal, int start, int nPixeles);
@@ -73,16 +80,15 @@ void insertarPixelColumna(IMAGE * pixeles, int n, int x, int y, Matriz * matrizF
 
 void reducirPorColumnas(Matriz * matriz, Matriz * matrizFinal, int nPixeles);
 
-IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho);
+IMGINFO* obtenerImagen(char* nombre);
 
-IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho);
 
 
 void reducirPorFilas(Matriz * matriz, Matriz * matrizFinal, int nPixeles);
 
 void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * salida1, FILE * salida2, int pantalla);
 
-int verificarEntradas(Matriz * fileEntrada, FILE * fileSalida1, FILE * fileSalida2, int nReducciones, int nPixeles, int metodo, int flag);
+int verificarEntradas(IMGINFO* fileEntrada, FILE * fileSalida1, FILE * fileSalida2, int nReducciones, int nPixeles, int metodo, int flag);
 
 int init(int argc, char **argv);
 
@@ -92,7 +98,7 @@ INFOHEADER* iniciarInfoHeader();
 
 void writeMatriz(Matriz* m, FILE* f);
 
-int guardarFichero(FILE* f, Matriz* m,FILEHEADER fh,INFOHEADER ih);
+int guardarFichero(FILE* f, Matriz* m,IMGINFO* imginfo);
 
 int main(int argc, char **argv);
 

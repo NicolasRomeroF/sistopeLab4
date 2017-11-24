@@ -164,60 +164,57 @@ void reducirPorColumnas(Matriz * matriz, Matriz * matrizFinal, int nPixeles) {
 	}
 }
 
-IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
+IMGINFO* obtenerImagen(char* nombre)
 {
-	FILEHEADER* fh=(FILEHEADER*)malloc(sizeof(FILEHEADER));
-	INFOHEADER* ih=(INFOHEADER*)malloc(sizeof(INFOHEADER));
+	IMGINFO* imginfo=(IMGINFO*)malloc(sizeof(IMGINFO));
+	FILEHEADER fh;
+	INFOHEADER ih;
 	FILE *img = fopen(nombre, "rb");
 	if (img == NULL)
 	{
 		printf("ERROR: No se pudo abrir la imagen\n");
 		return NULL;
 	}
-	if (fh== NULL || ih == NULL)
-	{
-		printf("ERROR: No se pudo asignar memoria para headers\n");
-		return NULL;
-	}
+
 
 	//FILE *s = fopen(strcat(nombre, "prueba.bmp"), "wb");
-	fread(fh, sizeof(unsigned char), sizeof(FILEHEADER), img);
-	fread(ih, sizeof(unsigned char), sizeof(INFOHEADER), img);
+	fread(&fh, sizeof(unsigned char), sizeof(FILEHEADER), img);
+	fread(&ih, sizeof(unsigned char), sizeof(INFOHEADER), img);
 	//fwrite(&fh, sizeof(unsigned char), sizeof(FILEHEADER), s);
 	//fwrite(&ih, sizeof(unsigned char), sizeof(INFOHEADER), s);
 	printf("%d+%d", sizeof(FILEHEADER), sizeof(INFOHEADER));
 
-	printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh->fileMarker1, fh->fileMarker2, fh->bfSize, fh->unused1, fh->unused2, fh->imageDataOffset);
-	printf("w = %d, h = %d, biSI = %d\n", ih->width, ih->height, ih->biSizeImage);
+	printf("fM1 = %c, fM2 = %c, bfS = %u, un1 = %hu, un2 = %hu, iDO = %u\n", fh.fileMarker1, fh.fileMarker2, fh.bfSize, fh.unused1, fh.unused2, fh.imageDataOffset);
+	printf("w = %d, h = %d, biSI = %d\n", ih.width, ih.height, ih.biSizeImage);
 	int i, j;
 
-	IMAGE** im = (IMAGE**)malloc(sizeof(IMAGE*)*ih->height);
+	IMAGE** im = (IMAGE**)malloc(sizeof(IMAGE*)*ih.height);
 	if (im == NULL)
 	{
 		printf("ERROR: No se pudo asignar memoria a la imagen\n");
 		return NULL;
 	}
-	for (i = 0; i < ih->height; i++)
+	for (i = 0; i < ih.height; i++)
 	{
-		im[i] = (IMAGE*)malloc(sizeof(IMAGE) * ih->width);
+		im[i] = (IMAGE*)malloc(sizeof(IMAGE) * ih.width);
 		if (im[i] == NULL)
 		{
 			printf("ERROR: No se pudo asignar memoria a la imagen\n");
 			return NULL;
 		}
 	}
-	unsigned int pixelBytesPerRow = ih->width * 3;
+	unsigned int pixelBytesPerRow = ih.width * 3;
 	unsigned int paddingBytesPerRow = (4 - (pixelBytesPerRow % 4)) % 4;
-	fseek(img, fh->imageDataOffset, SEEK_SET);
+	fseek(img, fh.imageDataOffset, SEEK_SET);
 	IMAGE aux;
 	//printf("asdsadn\n");
 
 	int cont = 0;
 	//static unsigned char zeroes[3] = {0,0,0};
 
-	for (i = ih->height - 1; i > -1; i--)
+	for (i = ih.height - 1; i > -1; i--)
 	{
-		for (j = 0; j < ih->width; j++)
+		for (j = 0; j < ih.width; j++)
 		{
 
 			fread(&aux, sizeof(unsigned char), sizeof(IMAGE), img);
@@ -231,36 +228,31 @@ IMAGE** obtenerImagen(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
 	}
 	printf("redi %d\n", cont);
 
-	fho = fh;
-	iho = ih;
 	printf("puntero asignado\n");
 	fclose(img);
 	printf("fichero cerrado\n");
+	imginfo->fh=fh;
+	imginfo->ih=ih;
+	imginfo->img=im;
 	//fclose(s);
-	return im;
+	return imginfo;
 }
 
-Matriz* obtenerMatriz(char* nombre, FILEHEADER* fho, INFOHEADER* iho)
+IMGINFO* obtenerMatriz(char* nombre)
 {
-	FILEHEADER* fh;
-	INFOHEADER* ih;
-	IMAGE** img = obtenerImagen(nombre, fh, ih);
-	if (img == NULL) {
-		return NULL;
-	}
+	IMGINFO* imgaux = obtenerImagen(nombre);
 	Matriz* m = (Matriz*)malloc(sizeof(Matriz));
 	if (m == NULL) {
 		return NULL;
 	}
 	printf("poner matriz\n");
-	m->matriz = img;
+	m->matriz = imgaux->img;
 	printf("matriz puesta\n");
-	m->x = ih->height;
-	m->y = ih->width;
-	printf("tamanios puestos\n");
-	fho=fh;
-	iho=ih;
-	return m;
+	m->x = imgaux->ih.height;
+	m->y = imgaux->ih.width;
+	printf("asdasd%dx%d\n",imgaux->ih.height,imgaux->ih.width);
+	imgaux->m=m;
+	return imgaux;
 }
 
 void reducirPorFilas(Matriz * matriz, Matriz * matrizFinal, int nPixeles) {
@@ -289,9 +281,9 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 	}
 	matriz->x = xM;
 	matriz->y = yM;*/
-	FILEHEADER fh;
-	INFOHEADER ih;
-	Matriz * matriz = obtenerMatriz(entrada, &fh, &ih);
+	IMGINFO* imginfo=obtenerMatriz(entrada);
+	Matriz * matriz = imginfo->m;
+	printf("%dx%d\n",matriz->x,matriz->y);
 	printf("obtuveMatriz\n");
 	//guardarFichero(salida2, matriz);
 	Matriz * matrizFinal;
@@ -305,6 +297,8 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 			//printf("nReducciones actual= %d----------------------------------------------------------------------\n", z);
 			double div = ceil((double)matriz->y / nPixeles);
 			int xMF = matriz->x, yMF = (int)div;
+			printf("%dx%d\n",matriz->x,matriz->y);
+			printf("asd: %dx%d\n",imginfo->ih.width,imginfo->ih.height);
 			//printf("nPixeles = %d, Dimensiones matriz final xMF= %d yMF = %d \n", nPixeles, xMF, yMF);
 			matrizFinal = (Matriz*)malloc(sizeof(Matriz));
 			matrizFinal->matriz = (IMAGE**)malloc(sizeof(IMAGE*)*xMF);
@@ -327,7 +321,7 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 			z++;
 		}
 		printf("fichero1\n");
-		guardarFichero(salida1, matrizFinal, fh, ih);
+		guardarFichero(salida1, matrizFinal, imginfo);
 		////printMatriz(matrizFinal);
 	}
 	else if (metodo == 2) {
@@ -359,11 +353,11 @@ void reducir(int nReducciones, int metodo, int nPixeles, char * entrada, FILE * 
 			z++;
 		}
 		printf("guaradndooo\n");
-		guardarFichero(salida2, matrizFinal,fh,ih);
+		guardarFichero(salida2, matrizFinal,imginfo);
 	}
 }
 
-int verificarEntradas(Matriz * fileEntrada, FILE * fileSalida1, FILE * fileSalida2, int nReducciones, int nPixeles, int metodo, int flag) {
+int verificarEntradas(IMGINFO * fileEntrada, FILE * fileSalida1, FILE * fileSalida2, int nReducciones, int nPixeles, int metodo, int flag) {
 	if (fileEntrada == NULL) {
 		printf("No se pudo abrir archivo de entrada\n");
 		return 0;
@@ -473,7 +467,7 @@ int init(int argc, char **argv) {
 	FILE* fileSalida2 = fopen(archivoSalida2, "wb");
 
 
-	if (verificarEntradas(obtenerMatriz(archivoEntrada, NULL, NULL), fileSalida1, fileSalida2, nReducciones, nPixeles, metodo, flag) == 0) {
+	if (verificarEntradas(obtenerMatriz(archivoEntrada), fileSalida1, fileSalida2, nReducciones, nPixeles, metodo, flag) == 0) {
 		printf("salir\n");
 		return 0;
 	}
@@ -529,20 +523,21 @@ void writeMatriz(Matriz* m, FILE* f)
 	}
 }
 
-int guardarFichero(FILE* f, Matriz* m, FILEHEADER fh, INFOHEADER ih)
+int guardarFichero(FILE* f, Matriz* m, IMGINFO* imginfo)
 {
 	printf("paseih\n");
-	printf("%dx%d\n", m->y, m->x);
-	ih.width = m->y;
+	printf("%dx%d\n", imginfo->ih.width, imginfo->ih.height);
+	//imginfo->ih.width = m->y;
 	//static unsigned char header[54] = {66, 77, 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 24};
-	ih.height = m->x;
-	printf("%dx%d\n", m->y, m->x);
+	//imginfo->ih.height = m->x;
 	int imageSize = m->y * m->x;
 	int file_size = 54 + 4 * imageSize;
-	fh.bfSize = file_size;
-	ih.biSizeImage = imageSize;
-	fwrite(&fh, sizeof(unsigned char), sizeof(FILEHEADER), f);
-	fwrite(&ih, sizeof(unsigned char), sizeof(INFOHEADER), f);
+	//imginfo->fh.bfSize = file_size;
+	//imginfo->ih.biSizeImage = imageSize;
+	printf("escreibir headers\n");
+	fwrite(&imginfo->fh, sizeof(unsigned char), sizeof(FILEHEADER), f);
+	fwrite(&imginfo->ih, sizeof(unsigned char), sizeof(INFOHEADER), f);
+	printf("headers escritos\n");
 	//fwrite(header, sizeof(unsigned char), 54, f);
 	printf("escribir matriz\n");
 	writeMatriz(m, f);
