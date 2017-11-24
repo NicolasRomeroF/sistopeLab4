@@ -86,9 +86,9 @@ int verificarEntradas(Matriz * fileEntrada, FILE * fileSalida1, FILE * fileSalid
 
 int init(int argc, char **argv);
 
-FILEHEADER iniciarFileHeader();
+FILEHEADER* iniciarFileHeader();
 
-INFOHEADER iniciarInfoHeader();
+INFOHEADER* iniciarInfoHeader();
 
 void writeMatriz(Matriz* m, FILE* f);
 
