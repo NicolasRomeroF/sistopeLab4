@@ -518,11 +518,12 @@ INFOHEADER iniciarInfoHeader()
 void writeMatriz(Matriz* m, FILE* f)
 {
 	IMAGE aux;
+	int i,j;
 	for (i = m->x - 1; i > -1; i--)
 	{
 		for (j = 0; j < m->y; j++)
 		{
-			aux=im[i][j]
+			aux=m->matriz[i][j];
 			fwrite(&aux, sizeof(unsigned char), sizeof(IMAGE), f);
 		}
 	}
